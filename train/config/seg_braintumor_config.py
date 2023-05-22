@@ -15,7 +15,7 @@ class network_cfg:
     # network
     network = Model_Network(
         backbone = Cascaded_ResUnet(in_ch=4,channels=12, blocks=3),
-        head = Model_Head(in_channels=12,num_class=3),
+        head = Model_Head(in_channels=12,num_class=[1,2]),
         apply_sync_batchnorm=False,
     )
 

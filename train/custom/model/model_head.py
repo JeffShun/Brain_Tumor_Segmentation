@@ -7,13 +7,13 @@ class Model_Head(nn.Module):
 
     def __init__(
         self,
-        in_channels: int,
-        num_class: int
+        in_channels,
+        num_class
     ):
         super(Model_Head, self).__init__()
         # TODO: 定制Head模型
-        self.conv1 = nn.Conv3d(in_channels, 1, 1)
-        self.conv2 = nn.Conv3d(in_channels, num_class, 1)
+        self.conv1 = nn.Conv3d(in_channels, num_class[0], 1)
+        self.conv2 = nn.Conv3d(in_channels, num_class[1], 1)
         self.sp_wt_loss = SamplingBCELoss(neg_ratio=4, min_sampling=2000)
         self.sp_tc_loss = SamplingBCELoss(neg_ratio=6, min_sampling=1000)
         self.sp_et_loss = SamplingBCELoss(neg_ratio=8, min_sampling=500)
@@ -24,21 +24,20 @@ class Model_Head(nn.Module):
         input1, input2 = inputs
         out1 = self.conv1(input1)
         out2 = self.conv2(input2)
-        return out1, out2
+        return torch.cat((out1, out2),1)
 
     def loss(self, inputs, targets):
-        input1, input2 = inputs
         target1 = targets[:,0]
         weight1 = torch.ones_like(target1,dtype=target1.dtype,device=target1.device)
         target2 = targets[:,1]
         weight2 = target1
         target3 = targets[:,2]
         weight3 = target2
-        sp_wt_loss = self.sp_wt_loss(input2[:,0],target1,weight1)
-        sp_wt_aux_loss = self.sp_wt_loss(input1[:,0],target1,weight1)
-        sp_tc_loss = self.sp_tc_loss(input2[:,1],target2,weight2)
-        sp_et_loss = self.sp_et_loss(input2[:,2],target3,weight3)
-        return {"sp_wt_aux_loss": sp_wt_aux_loss, "sp_wt_loss": sp_wt_loss , "sp_tc_loss": sp_tc_loss, "sp_et_loss": sp_et_loss}
+
+        sp_wt_loss = self.sp_wt_loss(inputs[:,0],target1,weight1)
+        sp_tc_loss = self.sp_tc_loss(inputs[:,1],target2,weight2)
+        sp_et_loss = self.sp_et_loss(inputs[:,2],target3,weight3)
+        return {"sp_wt_loss": sp_wt_loss , "sp_tc_loss": sp_tc_loss, "sp_et_loss": sp_et_loss}
 
 class SamplingBCELoss(nn.Module):
     def __init__(self, neg_ratio=8, min_sampling=1000):

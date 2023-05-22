@@ -96,7 +96,7 @@ class SegBrainTumorPredictor:
 
         with torch.no_grad():
             patch_gpu = volume.half().to(self.device)
-            _, seg_heatmap = self.net.forward_test(patch_gpu)
+            seg_heatmap = self.net.forward_test(patch_gpu)
             seg_heatmap = torch.sigmoid(seg_heatmap)
             seg_heatmap = self._resize_torch(seg_heatmap, shape)    
             seg_arr = seg_heatmap.squeeze().cpu().detach().numpy()
