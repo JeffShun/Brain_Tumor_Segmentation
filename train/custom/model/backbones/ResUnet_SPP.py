@@ -83,10 +83,10 @@ class DoubleConv(nn.Module):
     def forward(self, input):
         return self.conv(input)
 
-class ResUnet(nn.Module):
+class ResUnet_SPP(nn.Module):
 
     def __init__(self, in_ch, channels=16, blocks=3):
-        super(ResUnet, self).__init__()
+        super(ResUnet_SPP, self).__init__()
 
         self.layer1 = DoubleConv(in_ch, channels, stride=1, kernel_size=3)
         self.layer2 = make_res_layer(channels * 1, channels * 2, blocks, stride=2)
@@ -102,6 +102,26 @@ class ResUnet(nn.Module):
         self.mconv2 = DoubleConv(channels * 4, channels * 1)
         self.up2 = nn.Upsample(scale_factor=2, mode='trilinear', align_corners=False)
         self.mconv1 = DoubleConv(channels * 2, channels * 1)
+
+        self.spp_up_conv1 = nn.Sequential(
+                    conv1x1(channels, channels)
+                    )
+        self.spp_up_conv2 = nn.Sequential(
+                    conv1x1(channels, channels),
+                    nn.Upsample(scale_factor=2, mode='trilinear', align_corners=False)
+                    )
+        self.spp_up_conv3 = nn.Sequential(
+                    conv1x1(channels*2, channels),
+                    nn.Upsample(scale_factor=4, mode='trilinear', align_corners=False)
+                    )
+        self.spp_up_conv4 = nn.Sequential(
+                    conv1x1(channels*4, channels),
+                    nn.Upsample(scale_factor=8, mode='trilinear', align_corners=False)
+                    )
+        self.spp_up_conv5 = nn.Sequential(
+                    conv1x1(channels*8, channels),
+                    nn.Upsample(scale_factor=16, mode='trilinear', align_corners=False)
+                    )
         
     def forward(self, input):
         c1 = self.layer1(input)
@@ -115,18 +135,14 @@ class ResUnet(nn.Module):
         merge2 = self.mconv2(torch.cat([self.up3(merge3), c2], dim=1))
         merge1 = self.mconv1(torch.cat([self.up2(merge2), c1], dim=1))
         
-        return merge1
+        out1 = self.spp_up_conv1(merge1)
+        out2 = self.spp_up_conv2(merge2)
+        out3 = self.spp_up_conv3(merge3)
+        out4 = self.spp_up_conv4(merge4)
+        out5 = self.spp_up_conv5(c5)
 
-class Cascaded_ResUnet(nn.Module):
+        return torch.cat((out1, out2, out3, out4, out5), 1)
 
-    def __init__(self, in_ch, channels=16, blocks=3):
-        super(Cascaded_ResUnet, self).__init__()
-        self.unet1 = ResUnet(in_ch, channels, blocks)
-        self.unet2 = ResUnet(channels, channels, blocks)
-    def forward(self, input):
-        c1 = self.unet1(input)
-        c2 = self.unet2(c1)  
-        return c1, c2
 
 if __name__ == '__main__':
     model = ResUnet_SPP(1, 1)

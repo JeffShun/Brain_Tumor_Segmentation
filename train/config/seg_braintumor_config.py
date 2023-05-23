@@ -1,7 +1,7 @@
 import sys, os
 work_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(work_dir)
-from custom.model.backbones.Cascaded_ResUnet import *
+from custom.model.backbones.ResUnet_SPP import *
 from custom.model.model_head import *
 from custom.model.model_network import *
 from custom.utils.common_tools import *
@@ -14,8 +14,8 @@ class network_cfg:
 
     # network
     network = Model_Network(
-        backbone = Cascaded_ResUnet(in_ch=4,channels=12, blocks=3),
-        head = Model_Head(in_channels=12,num_class=[1,2]),
+        backbone = ResUnet_SPP(in_ch=4,channels=12, blocks=3),
+        head = Model_Head(in_channels=60,num_class=3),
         apply_sync_batchnorm=False,
     )
 
