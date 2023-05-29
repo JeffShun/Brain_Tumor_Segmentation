@@ -7,21 +7,31 @@ class Model_Head(nn.Module):
 
     def __init__(
         self,
-        in_channels,
-        num_class
+        in_channel1,
+        in_channel2,
+        head1,
+        head2,
+        label_smooth
     ):
         super(Model_Head, self).__init__()
         # TODO: 定制Head模型
-        self.conv = nn.Conv3d(in_channels, num_class, 1)
+        self.label_smooth = label_smooth
+        self.conv1 = nn.Conv3d(in_channel1, head1, 1)
+        self.conv2 = nn.Conv3d(in_channel2, head2, 1)
         self.diceloss = DiceLoss()
-        self.ssloss = Sensitivity_SpecificityLoss(alpha_sen=0.4)
+        self.ssloss = Sensitivity_SpecificityLoss(alpha_sen=0.6)
 
     def forward(self, inputs):
         # TODO: 定制forward网络
-        out = self.conv(inputs)
-        return out
+        input1, input2 = inputs
+        out1 = self.conv1(input1)
+        out2 = self.conv2(input2)
+        return torch.cat([out1, out2],1)
 
     def loss(self, inputs, targets):
+        targets[targets == 0] = self.label_smooth
+        targets[targets == 1] = 1-self.label_smooth
+        
         wt_diceloss = self.diceloss(inputs[:,0],targets[:,0])
         tc_diceloss = self.diceloss(inputs[:,1],targets[:,1])
         et_diceloss = self.diceloss(inputs[:,2],targets[:,2])

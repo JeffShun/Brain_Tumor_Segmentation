@@ -11,11 +11,10 @@ class Model_Network(nn.Module):
         apply_sync_batchnorm=True
     ):
         super(Model_Network, self).__init__()
-
         self.backbone = backbone
         self.head = head
-
         self.initialize_weights()
+
         if apply_sync_batchnorm:
             self._apply_sync_batchnorm()
 
