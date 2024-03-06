@@ -1,4 +1,8 @@
-## 文件结构说明
+## 一、基于级联U-Net的脑肿瘤分割模型
+**论文链接：[CU-Net: Cascaded U-Net with Loss Weighted Sampling for Brain Tumor Segmentation](https://springer.dosf.top/chapter/10.1007/978-3-030-33226-6_12)** 
+
+
+## 二、主要文件说明
 
 - train.py: 单卡训练代码入口
 - train_multi_gpu.py: 分布式训练代码入口
