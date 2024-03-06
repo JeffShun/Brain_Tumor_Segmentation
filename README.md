@@ -1,5 +1,5 @@
 ## 一、基于级联U-Net的脑肿瘤分割模型
-**论文链接：[CU-Net: Cascaded U-Net with Loss Weighted Sampling for Brain Tumor Segmentation](https://springer.dosf.top/chapter/10.1007/978-3-030-33226-6_12)** 
+**论文链接（MICCAI2019 workshop）：[CU-Net: Cascaded U-Net with Loss Weighted Sampling for Brain Tumor Segmentation](https://springer.dosf.top/chapter/10.1007/978-3-030-33226-6_12)** 
 
 
 ## 二、主要文件说明
